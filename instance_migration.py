@@ -40,7 +40,7 @@ import os
 import argparse
 import google.auth
 from googleapiclient import discovery
-from vm_network_migration.handlers.instance_network_migration import InstanceNetworkMigration
+from vm_network_migration.handlers.instance_migration.instance_network_migration import InstanceNetworkMigration
 
 if __name__ == '__main__':
     if os.path.exists('./backup.log'):

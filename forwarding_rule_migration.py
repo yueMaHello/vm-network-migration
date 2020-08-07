@@ -39,7 +39,7 @@ import os
 import argparse
 import google.auth
 from googleapiclient import discovery
-from vm_network_migration.handlers.forwarding_rule_migration import ForwardingRuleMigration
+from vm_network_migration.handlers.forwarding_rule_migration.forwarding_rule_migration import ForwardingRuleMigration
 
 if __name__ == '__main__':
     if os.path.exists('./backup.log'):

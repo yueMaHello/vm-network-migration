@@ -38,7 +38,7 @@ import warnings
 import argparse
 import google.auth
 from googleapiclient import discovery
-from vm_network_migration.handlers.instance_group_network_migration import InstanceGroupNetworkMigration
+from vm_network_migration.handlers.instance_group_migration.instance_group_network_migration import InstanceGroupNetworkMigration
 import os
 
 if __name__ == '__main__':

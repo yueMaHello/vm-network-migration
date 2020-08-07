@@ -18,7 +18,7 @@
 from vm_network_migration.utils import initializer
 from vm_network_migration.handlers.compute_engine_resource_migration import ComputeEngineResourceMigration
 from vm_network_migration.handler_helper.selfLink_executor import SelfLinkExecutor
-import warnings
+
 
 class TargetInstanceMigration(ComputeEngineResourceMigration):
     @initializer

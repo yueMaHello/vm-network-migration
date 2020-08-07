@@ -37,7 +37,6 @@ class ForwardingRule(object):
         self.forwarding_rule_configs = None
         self.operations = None
         self.backends_selfLinks = None
-        self.migrated = False
 
     def log(self):
         """ Log the configuration

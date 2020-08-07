@@ -18,9 +18,7 @@ according to the given resource's selfLink.
 """
 import re
 
-from vm_network_migration.errors import *
 from vm_network_migration.utils import initializer
-import warnings
 
 
 class SelfLinkExecutor:
@@ -193,7 +191,7 @@ class SelfLinkExecutor:
         Returns: InstanceGroupNetworkMigration
 
         """
-        from vm_network_migration.handlers.instance_group_network_migration import InstanceGroupNetworkMigration
+        from vm_network_migration.handlers.instance_group_migration.instance_group_network_migration import InstanceGroupNetworkMigration
         if self.instance_group != None:
             instance_group_migration_handler = InstanceGroupNetworkMigration(
                 self.compute,
@@ -212,7 +210,7 @@ class SelfLinkExecutor:
         Returns: InstanceNetworkMigration
 
         """
-        from vm_network_migration.handlers.instance_network_migration import InstanceNetworkMigration
+        from vm_network_migration.handlers.instance_migration.instance_network_migration import InstanceNetworkMigration
 
         if self.instance != None:
             instance_migration_handler = InstanceNetworkMigration(self.compute,
@@ -231,7 +229,7 @@ class SelfLinkExecutor:
         Returns: BackendServiceMigration
 
         """
-        from vm_network_migration.handlers.backend_service_migration import BackendServiceMigration
+        from vm_network_migration.handlers.backend_service_migration.backend_service_migration import BackendServiceMigration
         if self.backend_service != None:
             backend_service_migration_handler = BackendServiceMigration(
                 self.compute,
@@ -250,7 +248,7 @@ class SelfLinkExecutor:
         Returns: ForwardingRuleMigration
 
         """
-        from vm_network_migration.handlers.forwarding_rule_migration import ForwardingRuleMigration
+        from vm_network_migration.handlers.forwarding_rule_migration.forwarding_rule_migration import ForwardingRuleMigration
         if self.forwarding_rule != None:
             forwarding_rule_migration_handler = ForwardingRuleMigration(
                 self.compute,
@@ -297,7 +295,7 @@ class SelfLinkExecutor:
         Returns: TargetInstanceMigration
 
         """
-        from vm_network_migration.handlers.target_instance_migration import TargetInstanceMigration
+        from vm_network_migration.handlers.instance_migration.target_instance_migration import TargetInstanceMigration
         if self.target_instance != None:
             target_instance_handler = TargetInstanceMigration(self.compute,
                                                               self.project,
@@ -315,7 +313,7 @@ class SelfLinkExecutor:
         Returns: TargetPoolMigration
 
         """
-        from vm_network_migration.handlers.target_pool_migration import TargetPoolMigration
+        from vm_network_migration.handlers.target_pool_migration.target_pool_migration import TargetPoolMigration
         if self.target_pool != None:
             target_pool_migration_handler = TargetPoolMigration(self.compute,
                                                                 self.project,

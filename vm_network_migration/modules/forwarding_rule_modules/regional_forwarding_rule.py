@@ -116,8 +116,4 @@ class RegionalForwardingRule(ForwardingRule):
             self.operations.wait_for_region_operation(
                 insert_forwarding_rule_operation['name'])
 
-        if forwarding_rule_config == self.forwarding_rule_configs:
-            self.migrated = False
-        else:
-            self.migrated = True
         return insert_forwarding_rule_operation

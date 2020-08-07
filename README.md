@@ -2,43 +2,44 @@
 **This is not an officially supported Google product.**
 ## Description
 
-This Python library is used to migrate a VM instance or an instance group from its legacy network to a
+This Python library is used to migrate GCE resources from its legacy network to a
 subnetwork with downtime. The project uses Google APIs Python client library (Compute Engine APIs) to manage the 
 Compute Engine resources. 
 
-## Requirements and Limitations
-### Single VM network migration:
-1. A new VM will be created in the target subnetwork, and the original VM will be deleted. 
-2. The customer can choose to preserve the external IP.
-3. If the original VM uses a Ephemeral external IP, and the customer chooses to preserve it, it will become a static external IP after the migration.
-4. Support migrating a VM from a legacy network to a subnetwork, or from one VPC network to another. Within a network, a VM can also be migrated from one subnet to another. Migration from any network to a legacy network is not allowed.
-5. The original VM should only have one NIC.
-6. The original VM and the new VM will have the same configuration except for the network interface. Therefore, they are in the same project, same zone, and same region.
-7. The original VM must not be part of any instance group before changing the network it is associated with, since VMs in an instance group have to be in the same network. 
-8. The original VM is assumed to be standalone. Other cases, for example, if the original instance is served as a backend of other services are not considered in the current scope.
-9. There is a possibility that the main flow runs into an error and the rollback procedure also fails. In this case, the customer may lose both the original VM and the new VM. The original VM’s configuration will be printed out as a reference.  
+## Supported GCE Resrouces:
+    1. VM instance (with IP preservation)
+    2. Instance group
+        (1)Unmanaged  (with IP preservation)
+        (2)Managed 
+    3. Target pool
+    4. Backend service
+        (1)Internal
+        (2)External
+        (3)Internal-self-managed
+    5. Forwarding rule 
+        (1)Internal 
+        (2)External (with IP preservation)
+        (3)Internal-managed 
 
-### Instance group network migration:
-1. For a managed instance group, after the migration, the VM instances of this group will be recreated with new disks and new IP addresses. A new instance template will be inserted without deleting the original instance template.
-2. For an unmanaged instance group, the customer can choose to preserve the instances’ external addresses.
-3. If the instance group is the backend of other services, the connection may be lost after the migration.
-4. The rollback procedure may also fail. In this case, the customer may lose both the original instance group and the new instance group. The original instance group’s configuration will be printed out as a reference.
 
-### Backend service network migration:
-1. Both external and internal backend services are supported.
-2. The backends in the backend service will be migrated from a legacy network to a VPC network. Migration from a VPC network to any network is not supported. 
-3. For a backend service which is serving an internal-managed load balancer (internal HTTPs load balancer), the backends will be migrated to the target VPC network. The network of the load balancer itself will remain unchanged, since an internal-managed load balancer must have already been on a VPC network.
-4. For an external or an internal-managed backend service with multiple backends, the migration can have no downtime. Because the tool will migrate backends one by one, the load balancer can distribute the traffic to other backends while migrating one of the backends. (Backends with mixing networks can exist at the same time and can serve the load balancer together.) If the backend service only has one backend, then the downtime will be several minutes.
-5. For an internal backend service, its associated forwarding rule will be deleted and recreated after the migration. It requires downtime.
+## Requirements:
+1. Support migration from a legacy network to a subnetwork, or from one VPC network to another VPC network. Migration from any network to a legacy network is not allowed.
+2. After the migration, only the network configuration will change, and all other configurations including project, zone and region will remain unchanged.
+3. For a VM, which is not in a managed instance group, after the migration, its external IP can remain unchanged.
+4. Rollback mechanism is needed to protect the failure
+5. The users need to take care of the firewalls by themselves. 
 
-### Target pool network migration:
-
-1. The instances in the target pool will be migrated from its legacy network to a VPC network. Migration from a VPC network to any network is not supported.
-2. If the instance is within an instance group, then the tool will run the instance group migration to migrate the whole instance group from its legacy network to a VPC network.
-3. If an instance is serving multiple target pools or backends, it is not recommended to migrate, since the unknown errors may happen to other target pools or backends after the migration.
-
-### Forwarding rule network migration:
-1. It is not supposed to migrate a forwarding rule. The tool will migrate all the backend services or the target pool pointed by the forwarding rule from a legacy network to a VPC network.
+## Limitations
+### General Limitations:
+1. The users should not change any GCE resources during the migration. Otherwise, there might be some errors, such as resources can not be found or out of quota issues. 
+2. Downtime is required.
+3. The rollback can also fail due to network issue or quota limitation issue. In this scenario, the user can refer to the ‘backup.log’ file to recreate the lost resources by themselves. 
+### Specific Limitations:
+#### [Limitations of VM migration.](readme/VM_INSTANCE_README.md)
+#### [Limitations of instance group migration.](readme/INSTANCE_GROUP_README.md)
+#### [Limitations of target pool migration.](readme/TARGET_POOL_README.md)
+#### [Limitations of backend service migration.](readme/BACKEND_SERVICE_README.md)
+#### [Limitations of forwarding rule migration.](readme/FORWARDING_RULE_README.md)
 
 ## Before Running
     1. If not already done, enable the Compute Engine API
@@ -56,18 +57,46 @@ Compute Engine resources.
     cd vm_network_migration
     pip3 install .
 ## Run
-#### Single VM network migration. [See more examples.](./VM_INSTANCE_README.md)
+#### Migrate by selfLink.
+A GCE resources can be referred by its selfLink.
+A legal selfLink's format can be 'https://www.googleapis.com/compute/v1/projects/project/zones/zone/instances/instance'
+or 'projects/project/zones/zone/instances/instance'
+
+     python3 migrate_by_selfLink.py --selfLink=selfLink-of-target-resource  \
+     --region=us-central1 --network=my-network  --subnetwork=my-network-subnet \
+     --preserve_instance_external_ip=False
+     
+#### Single VM network migration. [See more examples.](readme/VM_INSTANCE_README.md)
      python3 instance_network_migration.py  --project=my-project \
      --zone=us-central1-a  --original_instance=my-original-instance  \
      --network=my-network  --subnetwork=my-network-subnet1 \
      --preserve_external_ip=False 
-#### Instance group network migration
-     python3  instance_group_network_migration.py  --project=my-project \
+     
+#### Instance group network migration. [See more examples.](readme/INSTANCE_GROUP_README.md)
+     python3  instance_group_migration.py  --project=my-project \
      --instance_group=my-original-instance-group  --region=us-central \
      --zone=None --network=my-network  --subnetwork=my-network-subnet1 \
      --preserve_external_ip=False
      (Note: either --region or --zone must be specified.)
-     
+  
+#### Target pool network migration. [See more examples.](readme/TARGET_POOL_README.md)
+    python3 target_pool_migration.py  --project=my-project \
+    --target_pool_name=my-target-pool --region=us-central1 \
+    --network=my-network  --subnetwork=my-network-subnet \
+    --preserve_instance_external_ip=False
+
+#### Backend service migration. [See more examples.](readme/BACKEND_SERVICE_README.md)
+    python3 target_pool_migration.py  --project=my-project \
+    --target_pool_name=my-target-pool --region=us-central1 \
+    --network=my-network  --subnetwork=my-network-subnet \
+    --preserve_instance_external_ip=False
+    
+#### Forwarding rule migration. [See more examples.](readme/FORWARDING_RULE_README.md)
+    python3 forwarding_rule_migration.py  --project=my-project \
+    --forwarding_rule_name=my-forwarding-rule  --region=us-central1 \
+    --network=my-network  --subnetwork=my-network-subnet1 \
+    --preserve_instance_external_ip=False
+
 ## Source Code Headers
 
 Every file containing source code must include copyright and license

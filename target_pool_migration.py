@@ -39,7 +39,7 @@ import os
 import google.auth
 from googleapiclient import discovery
 import argparse
-from vm_network_migration.handlers.target_pool_migration import TargetPoolMigration
+from vm_network_migration.handlers.target_pool_migration.target_pool_migration import TargetPoolMigration
 
 if __name__ == '__main__':
     # google credentrial setup

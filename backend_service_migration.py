@@ -39,7 +39,7 @@ import warnings
 import google.auth
 from googleapiclient import discovery
 import argparse
-from vm_network_migration.handlers.backend_service_migration import BackendServiceMigration
+from vm_network_migration.handlers.backend_service_migration.backend_service_migration import BackendServiceMigration
 
 if __name__ == '__main__':
     if os.path.exists('./backup.log'):
